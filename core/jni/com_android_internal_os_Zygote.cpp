@@ -440,7 +440,7 @@ static void SetForkLoad(bool boost) {
 #endif
 
 // The list of open zygote file descriptors.
-static FileDescriptorTable* gOpenFdTable = NULL;
+//static FileDescriptorTable* gOpenFdTable = NULL;
 
 // Utility routine to fork zygote and specialize the child process.
 static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
@@ -477,14 +477,15 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   // If this is the first fork for this zygote, create the open FD table.
   // If it isn't, we just need to check whether the list of open files has
   // changed (and it shouldn't in the normal case).
-  if (gOpenFdTable == NULL) {
-    gOpenFdTable = FileDescriptorTable::Create();
-    if (gOpenFdTable == NULL) {
-      RuntimeAbort(env, __LINE__, "Unable to construct file descriptor table.");
-    }
-  } else if (!gOpenFdTable->Restat()) {
-    RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
-  }
+  ALOGE("krnlyng temporary hack");
+  //if (gOpenFdTable == NULL) {
+  //  gOpenFdTable = FileDescriptorTable::Create();
+  //  if (gOpenFdTable == NULL) {
+  //    RuntimeAbort(env, __LINE__, "Unable to construct file descriptor table.");
+  //  }
+  //} else if (!gOpenFdTable->Restat()) {
+  //  RuntimeAbort(env, __LINE__, "Unable to restat file descriptor table.");
+  //}
 
   pid_t pid = fork();
 
@@ -497,9 +498,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
 
     // Re-open all remaining open file descriptors so that they aren't shared
     // with the zygote across a fork.
-    if (!gOpenFdTable->ReopenOrDetach()) {
-      RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
-    }
+    //if (!gOpenFdTable->ReopenOrDetach()) {
+    //  RuntimeAbort(env, __LINE__, "Unable to reopen whitelisted descriptors.");
+    //}
 
     if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
       ALOGE("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno));
